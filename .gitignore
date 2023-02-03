@@ -1,0 +1,6 @@
+.DS_Store
+/data/
+/models/
+.ipynb_checkpoints
+__pycache_
+.gitignore_
