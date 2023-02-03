@@ -59,7 +59,8 @@ def get_features(temp_df,direc):
 def ts_features(tmp):
     max_arr=tmp.abs().nlargest(4).values
     med_arr=tmp.median()
-    mad_arr=tmp.mad()
+    #mad_arr=tmp.mad()
+    mad_arr=np.abs(tmp-tmp.median()).median()
     time_f=np.concatenate((max_arr,[med_arr],[mad_arr]))
     return time_f
 
@@ -167,20 +168,26 @@ def ts_2_feature_file(file):
     }
 
     table = table.replace_schema_metadata(combined_meta)
-
-    path=file[:42]+'feature_sets'+file[52:] 
-    pq.write_table(table, path)
+    
+    fn=os.path.basename(file)
+    from pathlib import Path
+    path = Path(os.getcwd())
+    fpath=os.path.join(path.parent.absolute(),'data','feature_sets',fn)
+    
+    pq.write_table(table, fpath)
     
 def mp_handler():
     
     from pathlib import Path
     path = Path(os.getcwd())
-    fpath=os.path.join(path.parent.absolute(),'data','timeseries') 
+    fpath=os.path.join(path.parent.absolute(),'data','synth_ts') 
 
     file_list=[]
     for file in os.listdir(fpath):
         if file.endswith(".pq"):
             file_list+=[os.path.join(fpath, file)]
+            
+    print(file_list[0])
     
     #write function to check whats already written and not reprocess
     # read metadata of existing pq store to compile list of events-stations

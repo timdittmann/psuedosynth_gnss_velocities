@@ -1,0 +1,5 @@
+Syncing local directory with s3
+(and vice versa)
+
+cd psuedosyn_gnssvel/data
+aws s3 sync . s3://gsf-gnss-ml/data/

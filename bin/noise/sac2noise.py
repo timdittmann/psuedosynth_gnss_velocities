@@ -89,5 +89,5 @@ for psd_stack_array,name in zip([H_stacked,V_stacked],["H","V"]):
     per_array.columns = new_header #set the header row as the df header
     per_array['percentile']=np.arange(5,100,5)
     per_array=per_array.set_index('percentile')
-    per_array.to_csv("../data/%s_psd_percentiles.csv" %name)
+    per_array.to_csv("../models/%s_psd_percentiles.csv" %name)
 

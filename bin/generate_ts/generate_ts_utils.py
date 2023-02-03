@@ -165,7 +165,7 @@ def write_to_pq(store_df_li, meta_array, noise_lev):
 
     table = table.replace_schema_metadata(combined_meta)
     path = Path(os.getcwd())
-    fpath=os.path.join(path.parent.absolute(),'data','timeseries','%s_%02d.pq' %(meta_dict['record_number'],noise_lev)) 
+    fpath=os.path.join(path.parent.absolute(),'data','synth_ts','%s_%02d.pq' %(meta_dict['record_number'],noise_lev)) 
     pq.write_table(table, fpath)
     
     
@@ -174,6 +174,7 @@ def write_to_pq(store_df_li, meta_array, noise_lev):
 def windowed_gaussian(duration,hf_dt,window_type='saragoni_hart',M=5.0,dist_in_km=50.,std=1.0,ptime=10,stime=20):
     '''
     Get a gaussian white noise time series and window it
+    modified from D.Melgar Mudpy
     '''
     
     from numpy.random import normal
@@ -212,6 +213,7 @@ def windowed_gaussian(duration,hf_dt,window_type='saragoni_hart',M=5.0,dist_in_k
 def apply_spectrum(w,A,f,hf_dt,is_gnss=False,gnss_scale=(1/2**0.5)*.5): #.5
     '''
     Apply the modeled spectrum to the windowed time series
+    modified from D.Melgar Mudpy
     
     '''
    
@@ -275,6 +277,9 @@ def apply_spectrum(w,A,f,hf_dt,is_gnss=False,gnss_scale=(1/2**0.5)*.5): #.5
     return seis         
 
 def make_noise(n_steps,f,epsd,PGD=False):
+    '''
+    modified from D.Melgar Mudpy
+    '''
     #define sample rate
     dt=0.2 #make this 1 so that the length of PGD can be controlled by duration
     
@@ -304,7 +309,7 @@ def make_noise(n_steps,f,epsd,PGD=False):
 
 
 def get_psd(h_or_v="H"):
-    psd_df=pd.read_csv("/home/ec2-user/pgv_ml/synth_gnss_vel/data/%s_psd_percentiles.csv" %h_or_v)
+    psd_df=pd.read_csv("../models/%s_psd_percentiles.csv" %h_or_v)
     return psd_df
 
 def modify_for_noise_df(psd_df, level=50):

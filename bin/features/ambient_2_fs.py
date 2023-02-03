@@ -24,8 +24,8 @@ import json
 
 from multiprocessing import Pool, cpu_count
 
-import sys
-sys.path.insert(1, '/home/ec2-user/pgv_ml/snivel/notebooks/')
+#import sys
+#sys.path.insert(1, '/home/ec2-user/pgv_ml/snivel/notebooks/')
 from pgv_ml_utils import *
 
 
@@ -35,7 +35,8 @@ def get_features_ambient(tmp,obs):
     #TIME
     max_arr=tmp.abs().nlargest(4).values
     med_arr=tmp.median()
-    mad_arr=tmp.mad()
+    #mad_arr=tmp.mad()
+    mad_arr=np.abs(tmp-tmp.median()).median()
     time_f=np.concatenate((max_arr,[med_arr],[mad_arr]))
 
     #frequency
@@ -120,8 +121,8 @@ def write_to_pq_ambient(store_df_li, meta_array, noise_lev):
     from pathlib import Path
     path = Path(os.getcwd())
     # CHANGE THIS FOR UNSEEN vs TRAINING
-    #fpath=os.path.join(path.parent.absolute(),'data','feature_sets','%s_%sa.pq' %(meta_dict['record_number'],meta_dict['station'])) 
-    fpath=os.path.join(path.parent.absolute(),'data','feature_sets_ambient_test','%s_%sa.pq' %(meta_dict['record_number'],meta_dict['station']))
+    fpath=os.path.join(path.parent.absolute(),'data','feature_sets','%s_%sa.pq' %(meta_dict['record_number'],meta_dict['station'])) 
+    #fpath=os.path.join(path.parent.absolute(),'data','feature_sets_ambient_test','%s_%sa.pq' %(meta_dict['record_number'],meta_dict['station']))
     pq.write_table(table, fpath)
 
 

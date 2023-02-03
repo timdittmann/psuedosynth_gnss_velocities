@@ -30,11 +30,12 @@ from nested_xval_utils import *
 
 
 fs={'feature':['psd', 'wavelet', 'time', 'all'], 'stacking':['horizontal'], 'dims':[['H0','H1','UP']], 'augment':[True, False]}
+fs={'feature':['psd'], 'stacking':['horizontal'], 'dims':[['H0','H1','UP']], 'augment':[True]}
 feature_sets=[dict(zip(fs, v)) for v in product(*fs.values())]
 
 #d = {'n_folds':[5],'max_depth': [50], 'n_estimators': [120], 'class_wt':[None],'wl_thresh':[0, 0.001,.005],}
 d = {'n_folds':[5],'max_depth': [10,100], 'n_estimators': [10,100], 'class_wt':[None,"balanced"], 'wl_thresh':[-15,0,15],} #'wl_thresh':[-15, -10, -5, 0]
-#d = {'n_folds':[5],'max_depth': [100], 'n_estimators': [500], 'class_wt':[None, "balanced_subsample"]}
+d = {'n_folds':[5],'max_depth': [10], 'n_estimators': [10], 'class_wt':[None], 'wl_thresh':[15],} #'wl_thresh':[-15, -10, -5, 0]
 hyperp=[dict(zip(d, v)) for v in product(*d.values())]
 
 print(hyperp)
@@ -51,7 +52,7 @@ ambient_list= list(meta_df[meta_df.magnitude.isnull()].eq_name.unique())
 event_list=meta_df[~meta_df.magnitude.isnull()].sort_values(['magnitude'], ascending=False).groupby("eq_name").count().sort_values(['station'], ascending=False).index.tolist()
 full_list=ambient_list+event_list
 
-
+print(len(full_list))
 #############
 import time
 startTime = time.time()
@@ -68,8 +69,13 @@ noaug_snr_test_keep=[]
 
 results=[]
 outer_results =[]
+
+first_tp=True
+first_fp=True
+    
 #Nested Cross validation, 10 runs
 num_runs=10
+num_runs=2
 #for k in np.arange(num_runs):
 for k in np.arange(num_runs):
     run=k+1
@@ -107,24 +113,27 @@ for k in np.arange(num_runs):
         precisions, recalls, thresholds = precision_recall_curve(y_test, y_pred_prob)
 
         # store the result
-        outer_results.append([p,r,f1,threshold, precisions, recalls, thresholds, y_test, y_pred_prob, best_est_, run, best_est_['feature'], test_set, features['augment']])
+        outer_results.append([p,r,f1,threshold, precisions, recalls, thresholds, y_test, y_pred_prob, best_est_, run, best_est_['feature'], test_set, features['augment'],features['feature']])
+        #'precision','recall','f1','threshold','precisions','recalls','thresholds','y_act','y_prob','params', 'run', 'feature', 'test stations', 'augment', 'features'
         # report progress
         print('>f1=%.3f, %s' % (f1, stats)) 
         
         executionTime = (time.time() - startTime)
         print('Execution time in seconds: ' + str(executionTime))
         
-        if ((features['feature']=='all') & (features['augment']==True)):
+        #if ((features['feature']=='all') & (features['augment']==True)):
+        if ((features['feature']=='psd') & (features['augment']==True)):
     
-            joblib.dump(clf, 'results/aug/model_run_%s.pkl' %run)
+            joblib.dump(clf, '../models/aug/model_run_%s.pkl' %run)
             
             aug_y_pred_keep.append(y_pred)
             aug_y_test_keep.append(y_test)
             aug_x_test_keep.append(X_test)
             aug_snr_test_keep.append(snr_metric)
-        if ((features['feature']=='all') & (features['augment']==False)):
+        #if ((features['feature']=='all') & (features['augment']==False)):
+        if ((features['feature']=='psd') & (features['augment']==False)):
     
-            joblib.dump(clf, 'results/no_aug/model_run_%s.pkl' %run)
+            joblib.dump(clf, '../models/no_aug/model_run_%s.pkl' %run)
             
             noaug_y_pred_keep.append(y_pred)
             noaug_y_test_keep.append(y_test)
@@ -154,7 +163,7 @@ for k in np.arange(num_runs):
             if 2 in arr:
                 marker='o'
                 color='#377eb8'
-                count+=1
+                #count+=1
                 if first_tp:
                     label='true positive'
                     first_tp=False
@@ -175,10 +184,10 @@ for k in np.arange(num_runs):
 
         
     df = pd.DataFrame(outer_results, columns=['precision','recall','f1','threshold','precisions','recalls','thresholds','y_act','y_prob','params', 'run', 'feature', 'test stations', 'augment', 'features'])
-    df.to_csv('results/nested_x_val.csv')
+    df.to_csv('../data/results/nested_x_val.csv')
     
     results_df2=pd.DataFrame(results)
-    results_df2.to_csv('results/station_results.csv')
+    results_df2.to_csv('../data/results/station_results.csv')
 
 y_pred_data=(np.concatenate( aug_y_pred_keep, axis=0 ))
 y_test_data=(np.concatenate( aug_y_test_keep, axis=0 ))
@@ -189,8 +198,8 @@ ydf=pd.DataFrame([y_pred_data,y_test_data]).T
 #xdf=pd.DataFrame(x_test_data)
 xdf=pd.DataFrame(np.column_stack( (x_test_data,snr_test_data)))
 
-ydf.to_parquet('results/aug/ydf.pq')
-xdf.to_parquet('results/aug/xdf.pq')
+ydf.to_parquet('../data/results/aug/ydf.pq')
+xdf.to_parquet('../data/results/aug/xdf.pq')
 
 
 
@@ -203,8 +212,8 @@ ydf=pd.DataFrame([y_pred_data,y_test_data]).T
 #xdf=pd.DataFrame(x_test_data)
 xdf=pd.DataFrame(np.column_stack( (x_test_data,snr_test_data)))
 
-ydf.to_parquet('results/no_aug_/ydf.pq')
-xdf.to_parquet('results/no_aug_/xdf.pq')
+ydf.to_parquet('../data/results/no_aug_/ydf.pq')
+xdf.to_parquet('../data/results/no_aug_/xdf.pq')
 
 
 
