@@ -221,4 +221,4 @@ if __name__ == '__main__':
     mp_handler()
     
     
-#nohup python -u nest_xval_synth_MP.py > program.out10 2>&1 &
+#nohup python -u ../bin/models/nest_xval_synth_MP.py > ../data/logs/program.out 2>&1 &
