@@ -77,7 +77,6 @@ def k_fold_results(train_set, param):
         
         X_train, y_train, name_list, times, snr_metric=list_to_featurearrays(train_fold, param, test=False)  
         X_test, y_test, name_list, times, snr_metric=list_to_featurearrays(test_fold, param, test=True)
-        #print((X_train.shape,X_test.shape))
         
         # train classifier
         clf = RandomForestClassifier(n_estimators=param['n_estimators'], max_depth=param['max_depth'], class_weight=param['class_wt'],random_state=10, n_jobs=-1).fit(X_train, y_train)

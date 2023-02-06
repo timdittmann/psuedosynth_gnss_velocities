@@ -36,15 +36,20 @@ def nested_xval_run(run, train_set_events,test_set_events):
     
     ######
     ###############
+    '''
     pq_list=[os.path.join(os.path.dirname(os.getcwd()), 'data/feature_sets/',f) for f in os.listdir(os.path.join(os.path.dirname(os.getcwd()), 'data/feature_sets/'))]
     #pd_list=[pd.read_parquet(pq) for pq in pq_list if ".pq" in pq]
     meta_list=[read_meta(pq_fs) for pq_fs in pq_list if ".pq" in pq_fs]
     meta_df=pd.DataFrame.from_records(meta_list)
-
+    '''
+    meta_df=pd.read_csv('../data/meta/fs_meta.csv')
+    
     ##########
     fs={'feature':['all','psd', 'wavelet', 'time'], 'stacking':['horizontal'], 'dims':[['H0','H1','UP']], 'augment':[True, False]}
+    fs={'feature':['psd'], 'stacking':['horizontal'], 'dims':[['H0','H1','UP']], 'augment':[True]}
     feature_sets=[dict(zip(fs, v)) for v in product(*fs.values())]
     d = {'n_folds':[5],'max_depth': [100], 'n_estimators': [100], 'class_wt':[None], 'wl_thresh':[-15,15],} #'wl_thresh':[-15, -10, -5, 0]
+    d = {'n_folds':[5],'max_depth': [10], 'n_estimators': [10], 'class_wt':[None], 'wl_thresh':[15],} #'wl_thresh':[-15, -10, -5, 0]
     hyperp=[dict(zip(d, v)) for v in product(*d.values())]
     #########
 
@@ -84,27 +89,27 @@ def nested_xval_run(run, train_set_events,test_set_events):
         # store the result
         outer_results.append([p,r,f1,threshold, precisions, recalls, thresholds, y_test, y_pred_prob, best_est_, run, best_est_['feature'], test_set, features['augment']])
         df = pd.DataFrame(outer_results, columns=['precision','recall','f1','threshold','precisions','recalls','thresholds','y_act','y_prob','params', 'run', 'feature', 'test stations', 'augment'])
-        df.to_csv('results/nested_x_val_%s.csv' %run)
+        df.to_csv('../data/results/nested_x_val_%s.csv' %run)
         
         # report progress
         print('RUN %s: %s : %s >f1=%.3f, %s' % (run, best_est_['feature'],best_est_['augment'],f1, stats)) 
 
         executionTime = (time.time() - startTime)
-        print('RUN %s Execution time in seconds: ' %run + str(executionTime))
+        print('RUN %s Execution time in hours: ' %run + str(executionTime/(60*60)))
         print(params)
 
         if features['augment']==True:
             
             ydf=pd.DataFrame([y_test,y_pred,y_pred_prob]).T
             ydf.columns = ydf.columns.astype(str)
-            ydf.to_parquet('results/aug/ydf_%s_%s.pq' %(features['feature'],run))
+            ydf.to_parquet('../data/results/aug/ydf_%s_%s.pq' %(features['feature'],run))
             
             xdf=pd.DataFrame(np.column_stack( (X_test,snr_metric)))
             xdf.columns = xdf.columns.astype(str)
-            xdf.to_parquet('results/aug/xdf_%s_%s.pq' %(features['feature'],run))
+            xdf.to_parquet('../data/results/aug/xdf_%s_%s.pq' %(features['feature'],run))
             
             if features['feature']=='all':
-                joblib.dump(clf, 'results/aug/model_run_%s.pkl' %run)     
+                joblib.dump(clf, '../models/aug/model_run_%s.pkl' %run)     
             
         '''
         if ((features['feature']=='all') & (features['augment']==False)):
@@ -128,8 +133,9 @@ def nested_xval_run(run, train_set_events,test_set_events):
 
         #generate list of stations for event
         for index, row in p_df.iterrows():
-            sta=pd.concat([pd.read_parquet(pq) for pq in pq_list if "%s_%02d.pq" %(row.record_number,int(row.noise_lev)) in pq])
-
+            #sta=pd.concat([pd.read_parquet(pq) for pq in pq_list if "%s_%02d.pq" %(row.record_number,int(row.noise_lev)) in pq])
+            pq_fn='../data/feature_sets/%s_%02d.pq' %(row.record_number,int(row.noise_lev))
+            sta=pd.read_parquet(pq_fn)
             X_, y_, names, times, snr_metric=fs_to_Xy(sta, best_est_, test=True)
 
             y_pred_prob=clf.predict_proba(X_)[:, 1]
@@ -163,7 +169,7 @@ def nested_xval_run(run, train_set_events,test_set_events):
             results.append([row.eq_name,row.record_number,row.magnitude, row.mechanism, row.Rrup, row.noise_lev, marker, \
                             color,label,threshold, snr_max, features['augment'], run, features['feature'], first_t])
             results_df2=pd.DataFrame(results, columns=['eq_name','record_number','magnitude','mechanism','Rrup','noise_lev','marker','color','label','threshold','snr_max','augment','run', 'features','first_t'])
-            results_df2.to_csv('results/station_results_%s.csv' %run)
+            results_df2.to_csv('../data/results/station_results_%s.csv' %run)
     
     
 def mp_handler():
@@ -173,6 +179,7 @@ def mp_handler():
     #pd_list=[pd.read_parquet(pq) for pq in pq_list if ".pq" in pq]
     meta_list=[read_meta(pq_fs) for pq_fs in pq_list if ".pq" in pq_fs]
     meta_df=pd.DataFrame.from_records(meta_list)
+    meta_df.to_csv('../data/meta/fs_meta.csv', index=False)
 
 
     ######################
@@ -185,8 +192,8 @@ def mp_handler():
     train_set_list=[]
     run_list=[]
     num_runs=10
-    #for k in np.arange(num_runs):
     for k in np.arange(num_runs):
+    #for k in np.arange(1):
         run=k+1
         items = deque(full_list)
         items.rotate(-k)

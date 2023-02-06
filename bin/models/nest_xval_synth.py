@@ -194,9 +194,9 @@ y_test_data=(np.concatenate( aug_y_test_keep, axis=0 ))
 x_test_data=np.concatenate( aug_x_test_keep, axis=0 )
 snr_test_data=np.concatenate( aug_snr_test_keep, axis=0 )
 
-ydf=pd.DataFrame([y_pred_data,y_test_data]).T
+ydf=pd.DataFrame([y_pred_data,y_test_data], columns=['predicted','test']).T
 #xdf=pd.DataFrame(x_test_data)
-xdf=pd.DataFrame(np.column_stack( (x_test_data,snr_test_data)))
+xdf=pd.DataFrame(np.column_stack( (x_test_data,snr_test_data)), columns=name_list)
 
 ydf.to_parquet('../data/results/aug/ydf.pq')
 xdf.to_parquet('../data/results/aug/xdf.pq')
@@ -208,9 +208,9 @@ y_test_data=(np.concatenate( noaug_y_test_keep, axis=0 ))
 x_test_data=np.concatenate( noaug_x_test_keep, axis=0 )
 snr_test_data=np.concatenate( noaug_snr_test_keep, axis=0 )
 
-ydf=pd.DataFrame([y_pred_data,y_test_data]).T
+ydf=pd.DataFrame([y_pred_data,y_test_data], columns=['predicted','test']).T
 #xdf=pd.DataFrame(x_test_data)
-xdf=pd.DataFrame(np.column_stack( (x_test_data,snr_test_data)))
+xdf=pd.DataFrame(np.column_stack( (x_test_data,snr_test_data)), columns=name_list)
 
 ydf.to_parquet('../data/results/no_aug_/ydf.pq')
 xdf.to_parquet('../data/results/no_aug_/xdf.pq')
