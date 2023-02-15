@@ -40,7 +40,8 @@ def get_features_old(tmp,obs, label):
     #TIME
     max_arr=tmp.abs().nlargest(4).values
     med_arr=tmp.median()
-    mad_arr=tmp.mad()
+    #mad_arr=tmp.mad()
+    mad_arr=np.abs(tmp-tmp.median()).median()
     time_f=np.concatenate((max_arr,[med_arr],[mad_arr]))
 
     #frequency
@@ -127,7 +128,8 @@ def write_to_pq_old2new(store_df_li, meta_array, noise_lev):
     table = table.replace_schema_metadata(combined_meta)
     from pathlib import Path
     path = Path(os.getcwd())
-    fpath=os.path.join(path.parent.absolute(),'data','feature_sets_JGR','%s' %(meta_dict['record_number'])) 
+    fpath=os.path.join(path.parent.absolute(),'data','feature_sets_JGR','%s' %(meta_dict['record_number']))
+    fpath=os.path.join('../data','feature_sets_JGR','%s' %(meta_dict['record_number']))
     pq.write_table(table, fpath)
 
 
@@ -183,6 +185,7 @@ def oldfs_2_newfs(infile):
 def mp_handler():
   
     path = '/home/ec2-user/pgv_ml/snivel/data/feature_set/*'
+    path = '../../snivel/data/feature_set/*'
 
     list_files=glob.glob(path)
 

@@ -27,12 +27,12 @@ import sys
 from nested_xval_utils import *
 
 
-fs={'feature':['all'], 'stacking':['horizontal'], 'dims':[['H0','H1','UP']], 'augment':[True]}
+fs={'feature':['psd_t'], 'stacking':['horizontal'], 'dims':[['H0','H1','UP']], 'augment':[True]}
 feature_sets=[dict(zip(fs, v)) for v in product(*fs.values())]
 
 #d = {'n_folds':[5],'max_depth': [50], 'n_estimators': [120], 'class_wt':[None],'wl_thresh':[0, 0.001,.005],}
-d = {'n_folds':[5],'max_depth': [10,100], 'n_estimators': [10,120], 'class_wt':[None, "balanced"],'wl_thresh':[-15,  0, 15]}
-#d = {'n_folds':[5],'max_depth': [100], 'n_estimators': [500], 'class_wt':[None, "balanced_subsample"]}
+#d = {'n_folds':[5],'max_depth': [10,100], 'n_estimators': [10,120], 'class_wt':[None, "balanced"],'wl_thresh':[-15,  0, 15]}
+d = {'n_folds':[5],'max_depth': [10], 'n_estimators': [10], 'class_wt':[None, "balanced_subsample"],'wl_thresh':[-15, 15]}
 hyperp=[dict(zip(d, v)) for v in product(*d.values())]
 
 print(hyperp)
@@ -60,12 +60,12 @@ for features in feature_sets:
     best_est_, stats=grid_search(full_list, params)
 
     X_train, y_train, name_list, times, snr_metric=list_to_featurearrays(full_list, best_est_, test=False) 
-    print(len(X_train))
-    clf = RandomForestClassifier(n_estimators=best_est_['n_estimators'], max_depth=best_est_['max_depth'], class_weight=best_est_['class_wt'],random_state=10, n_jobs=-1).fit(X_train, y_train)
+    print((X_train).shape)
+    clf = RandomForestClassifier(n_estimators=best_est_['n_estimators'], max_depth=best_est_['max_depth'], class_weight=best_est_['class_wt'],random_state=42, n_jobs=-1).fit(X_train, y_train)
     
     keep_thresh=str(int(100*stats.threshold))
     
-    joblib.dump(clf, 'results/synth_model_all_%s.pkl' %keep_thresh)
+    joblib.dump(clf, '../models/synth_model_all_%s.pkl' %keep_thresh)
 
 executionTime = (time.time() - startTime)
 print('Execution time in seconds: ' + str(executionTime))

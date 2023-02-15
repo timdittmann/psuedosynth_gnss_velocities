@@ -45,11 +45,12 @@ def nested_xval_run(run, train_set_events,test_set_events):
     meta_df=pd.read_csv('../data/meta/fs_meta.csv')
     
     ##########
-    fs={'feature':['all','psd', 'wavelet', 'time'], 'stacking':['horizontal'], 'dims':[['H0','H1','UP']], 'augment':[True, False]}
-    fs={'feature':['psd'], 'stacking':['horizontal'], 'dims':[['H0','H1','UP']], 'augment':[True]}
+    fs={'feature':['all','psd_t','psd', 'wavelet', 'time'], 'stacking':['horizontal'], 'dims':[['H0','H1','UP']], 'augment':[True, False]}
+    fs={'feature':['psd_t','psd', 'time'], 'stacking':['horizontal'], 'dims':[['H0','H1','UP']], 'augment':[True, False]}
+    #fs={'feature':['psd'], 'stacking':['horizontal'], 'dims':[['H0','H1','UP']], 'augment':[True]}
     feature_sets=[dict(zip(fs, v)) for v in product(*fs.values())]
-    d = {'n_folds':[5],'max_depth': [100], 'n_estimators': [100], 'class_wt':[None], 'wl_thresh':[-15,15],} #'wl_thresh':[-15, -10, -5, 0]
-    d = {'n_folds':[5],'max_depth': [10], 'n_estimators': [10], 'class_wt':[None], 'wl_thresh':[15],} #'wl_thresh':[-15, -10, -5, 0]
+    d = {'n_folds':[5],'max_depth': [10], 'n_estimators': [100], 'class_wt':[None,"balanced_subsample"], 'wl_thresh':[-30,0,30]} #'wl_thresh':[-15, -10, -5, 0]
+    #d = {'n_folds':[5],'max_depth': [10], 'n_estimators': [10], 'class_wt':[None], 'wl_thresh':[15],} #'wl_thresh':[-15, -10, -5, 0]
     hyperp=[dict(zip(d, v)) for v in product(*d.values())]
     #########
 
@@ -69,7 +70,7 @@ def nested_xval_run(run, train_set_events,test_set_events):
 
         X_train, y_train, name_list, times, snr_metric=list_to_featurearrays(train_set, best_est_, test=False) 
         X_test, y_test, name_list, times, snr_metric=list_to_featurearrays(test_set, best_est_, test=True)
-        clf = RandomForestClassifier(n_estimators=best_est_['n_estimators'], max_depth=best_est_['max_depth'], class_weight=best_est_['class_wt'],random_state=10, n_jobs=-1).fit(X_train, y_train)
+        clf = RandomForestClassifier(n_estimators=best_est_['n_estimators'], max_depth=best_est_['max_depth'], class_weight=best_est_['class_wt'],random_state=42, n_jobs=-1).fit(X_train, y_train)
 
         #y_pred=clf.predict(X_test)
         y_pred_prob=clf.predict_proba(X_test)[:, 1]
@@ -92,7 +93,7 @@ def nested_xval_run(run, train_set_events,test_set_events):
         df.to_csv('../data/results/nested_x_val_%s.csv' %run)
         
         # report progress
-        print('RUN %s: %s : %s >f1=%.3f, %s' % (run, best_est_['feature'],best_est_['augment'],f1, stats)) 
+        print('RUN %s: %s : %s >f1=%.3f, %s, train shape:%s test shape%s' % (run, best_est_['feature'],best_est_['augment'],f1, stats, X_train.shape,X_test.shape)) 
 
         executionTime = (time.time() - startTime)
         print('RUN %s Execution time in hours: ' %run + str(executionTime/(60*60)))
@@ -108,8 +109,8 @@ def nested_xval_run(run, train_set_events,test_set_events):
             xdf.columns = xdf.columns.astype(str)
             xdf.to_parquet('../data/results/aug/xdf_%s_%s.pq' %(features['feature'],run))
             
-            if features['feature']=='all':
-                joblib.dump(clf, '../models/aug/model_run_%s.pkl' %run)     
+            if (features['feature']=='all') | (features['feature']=='psd_t'):
+                joblib.dump(clf, '../models/aug/model_%s_run_%s.pkl' %(features['feature'],run))     
             
         '''
         if ((features['feature']=='all') & (features['augment']==False)):
@@ -221,4 +222,4 @@ if __name__ == '__main__':
     mp_handler()
     
     
-#nohup python -u ../bin/models/nest_xval_synth_MP.py > ../data/logs/program.out 2>&1 &
+#nohup python -u ../bin/models/nest_xval_synth_MP.py > ../data/logs/program2.out 2>&1 &

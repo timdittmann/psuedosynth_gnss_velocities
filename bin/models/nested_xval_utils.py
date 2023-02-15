@@ -79,7 +79,7 @@ def k_fold_results(train_set, param):
         X_test, y_test, name_list, times, snr_metric=list_to_featurearrays(test_fold, param, test=True)
         
         # train classifier
-        clf = RandomForestClassifier(n_estimators=param['n_estimators'], max_depth=param['max_depth'], class_weight=param['class_wt'],random_state=10, n_jobs=-1).fit(X_train, y_train)
+        clf = RandomForestClassifier(n_estimators=param['n_estimators'], max_depth=param['max_depth'], class_weight=param['class_wt'],random_state=42, n_jobs=-1).fit(X_train, y_train)
         
         ###WAS JUST THIS 
         #y_pred=clf.predict(X_test)
@@ -139,7 +139,7 @@ def k_fold_results_jgr(train_set, param, X_train_nga, y_train_nga, jgr_test, inc
         #print((X_train.shape,X_test.shape))
         
         # train classifier
-        clf = RandomForestClassifier(n_estimators=param['n_estimators'], max_depth=param['max_depth'], class_weight=param['class_wt'],random_state=10, n_jobs=-1).fit(X_train, y_train)
+        clf = RandomForestClassifier(n_estimators=param['n_estimators'], max_depth=param['max_depth'], class_weight=param['class_wt'],random_state=42, n_jobs=-1).fit(X_train, y_train)
         
         ###WAS JUST THIS 
         #y_pred=clf.predict(X_test)
@@ -175,21 +175,30 @@ def list_to_featurearrays(record_number_list, param, test):
     #fold=pd.read_parquet([os.path.join(os.path.dirname(os.getcwd()), 'data/feature_set/',f) for f in fold])
     
     fold_set_list=[]
-    
+    if os.path.basename(os.getcwd()) == 'mkfigs':
+        root_dir='../../'
+    else:
+        root_dir='../'
+
     # if no augmentation, on training runs only take the lowest noise slices plus the ambient noise
     if ((param['augment'] == False) & (test==False)): 
-        path=[os.path.join(os.path.dirname(os.getcwd()), 'data/feature_sets/', '%s_*05.pq' %f) for f in record_number_list]
+        #path=[os.path.join(os.path.dirname(os.getcwd()), 'data/feature_sets/', '%s_*05.pq' %f) for f in record_number_list]
+        path = [os.path.join(root_dir, 'data/feature_sets/%s_*05.pq' %f) for f in record_number_list]
         for j in path:
             fold_set_list+=glob.glob(j)
-        path=[os.path.join(os.path.dirname(os.getcwd()), 'data/feature_sets/', '%s_*a.pq' %f) for f in record_number_list]
+        #path=[os.path.join(os.path.dirname(os.getcwd()), 'data/feature_sets/', '%s_*a.pq' %f) for f in record_number_list]
+        path = [os.path.join(root_dir, 'data/feature_sets/%s_*a.pq' %f) for f in record_number_list]
         for j in path:
             fold_set_list+=glob.glob(j)
         
     else: 
-        path=[os.path.join(os.path.dirname(os.getcwd()), 'data/feature_sets/', '%s_*' %f) for f in record_number_list]
+        #path=[os.path.join(os.path.dirname(os.getcwd()), 'data/feature_sets/', '%s_*' %f) for f in record_number_list]
+        path = [os.path.join(root_dir, 'data/feature_sets/%s_*' %f) for f in record_number_list]
+        #print(path)
         for j in path:
             fold_set_list+=glob.glob(j)
     
+    #print(fold_set_list)
     fold=pd.read_parquet(fold_set_list)
     #X_, y_, name_list, times=fs_to_Xy_horizontal(fold, params)
    
@@ -209,7 +218,7 @@ def list_to_featurearrays_JGR(df,param, test=True):
     
     fold_set_list=[]
     for i,row in df.iterrows():
-        fn=os.path.join(os.path.dirname(os.getcwd()),'data/feature_sets_JGR',row.eventID+'_'+row.station+'.pq')
+        fn=os.path.join('../../data/feature_sets_JGR',row.eventID+'_'+row.station+'.pq')
         if os.path.exists(fn):
             fold_set_list.append(fn)
 
@@ -230,7 +239,8 @@ def list_to_featurearrays_ambient_test(param, test):
     
     fold_set_list=[]
  
-    path=[os.path.join(os.path.dirname(os.getcwd()), 'data/feature_sets_ambient_test/*.pq')]
+    #path=[os.path.join(os.path.dirname(os.getcwd()), 'data/feature_sets_ambient_test/*.pq')]
+    path=[os.path.join('../../data/feature_sets_ambient_test/*.pq')]
     print(path)
     for j in path:
         fold_set_list+=glob.glob(j)
@@ -261,7 +271,7 @@ def fs_to_Xy(df, param, test=True):
     
 
     for i,direc in enumerate(param['dims']):
-        psd_tmp=pd.DataFrame(df['%s_psd' %direc].tolist(), index= df.index).to_numpy()
+        psd_tmp=pd.DataFrame(df['%s_psd' %direc].tolist(), index= df.index).to_numpy()[:, 1:30]
         psd_names=['%s_P%s' %(direc,f) for f in np.arange(psd_tmp.shape[1])]
         
         time_tmp=pd.DataFrame(df['%s_time' %direc].tolist(), index= df.index).to_numpy()
@@ -273,17 +283,28 @@ def fs_to_Xy(df, param, test=True):
         
         
         if param['feature'] == 'psd':
-            X_temp=np.hstack((time_tmp,psd_tmp))
-            names=time_names+psd_names
+            #X_temp=np.hstack((time_tmp,psd_tmp))
+            #names=time_names+psd_names
+            X_temp=psd_tmp
+            names=psd_names
             
         if param['feature'] == 'wavelet':
-            X_temp=np.hstack((time_tmp,wl_tmp))
-            names=time_names+wl_names
+            #X_temp=np.hstack((time_tmp,wl_tmp))
+            #names=time_names+wl_names
+            X_temp=wl_tmp
+            names=wl_names
+        
         if param['feature'] == 'time':
             X_temp=time_tmp
             names=time_names
+            
+        if param['feature'] == 'psd_t':
+            X_temp=np.hstack((time_tmp,psd_tmp))
+            names=time_names+psd_names
+            
         if param['feature'] == 'all':
             X_temp=np.hstack((time_tmp,psd_tmp, wl_tmp))
+            #X_temp=np.hstack((time_tmp,psd_tmp))
             names=time_names+psd_names+wl_names
                     
 
@@ -320,7 +341,7 @@ def fs_to_Xy(df, param, test=True):
         X=X[mask]
         y=y[mask]
     
-    snr_metric=df[['H0_psd_snr','H0_psd_snr','H0_psd_snr']].max(axis=1)
+    snr_metric=df[['H0_psd_snr','H1_psd_snr','UP_psd_snr']].max(axis=1)
 
 
                                                    

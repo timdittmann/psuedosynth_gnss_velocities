@@ -16,8 +16,14 @@ import json
 def create_nga_event_station_list(rsn=False):
     '''
     '''
+    
+    if os.path.basename(os.getcwd()) == 'mkfigs':
+        root_dir='../../'
+    else:
+        root_dir='../'
+        
     path = Path(os.getcwd())
-    meta_directory=os.path.join(path.parent.absolute(),'data','ngaw2','*.csv')
+    meta_directory=os.path.join(root_dir,'data','ngaw2','*.csv')
     
     meta_files=glob.glob(meta_directory)
 
@@ -115,7 +121,7 @@ def vertical_idx(ts_list):
 
 def add_random_buffer(y,t,samples,target_sr):
     y_add=np.random.normal(0,.01/100,samples)
-    t_add=np.arange(-len(y_add),0,1)/target_sr
+    t_add=np.arange(-len(y_add)+t.min(),+t.min(),1)/target_sr
     y_new2=np.concatenate((y_add,y))
     t_new2=np.concatenate((t_add,t))
     return y_new2, t_new2
@@ -309,7 +315,12 @@ def make_noise(n_steps,f,epsd,PGD=False):
 
 
 def get_psd(h_or_v="H"):
-    psd_df=pd.read_csv("../models/%s_psd_percentiles.csv" %h_or_v)
+    if os.path.basename(os.getcwd()) == 'mkfigs':
+        root_dir='../../'
+    else:
+        root_dir='../'
+        
+    psd_df=pd.read_csv(root_dir+"models/%s_psd_percentiles.csv" %h_or_v)
     return psd_df
 
 def modify_for_noise_df(psd_df, level=50):
