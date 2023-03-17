@@ -27,12 +27,12 @@ import sys
 from nested_xval_utils import *
 
 
-fs={'feature':['psd_t'], 'stacking':['horizontal'], 'dims':[['H0','H1','UP']], 'augment':[True]}
+fs={'feature':['psd_t'], 'stacking':['horizontal'], 'dims':[['H0','H1','UP']], 'augment':[True,False]}
 feature_sets=[dict(zip(fs, v)) for v in product(*fs.values())]
 
 #d = {'n_folds':[5],'max_depth': [50], 'n_estimators': [120], 'class_wt':[None],'wl_thresh':[0, 0.001,.005],}
 #d = {'n_folds':[5],'max_depth': [10,100], 'n_estimators': [10,120], 'class_wt':[None, "balanced"],'wl_thresh':[-15,  0, 15]}
-d = {'n_folds':[5],'max_depth': [10], 'n_estimators': [10], 'class_wt':[None, "balanced_subsample"],'wl_thresh':[-15, 15]}
+d = {'n_folds':[5],'max_depth': [5,50], 'n_estimators': [10,120], 'class_wt':[None, "balanced_subsample"],'wl_thresh':[-30, 0, 30]}
 hyperp=[dict(zip(d, v)) for v in product(*d.values())]
 
 print(hyperp)

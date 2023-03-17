@@ -49,7 +49,7 @@ def nested_xval_run(run, train_set_events,test_set_events):
     fs={'feature':['psd_t','psd', 'time'], 'stacking':['horizontal'], 'dims':[['H0','H1','UP']], 'augment':[True, False]}
     #fs={'feature':['psd'], 'stacking':['horizontal'], 'dims':[['H0','H1','UP']], 'augment':[True]}
     feature_sets=[dict(zip(fs, v)) for v in product(*fs.values())]
-    d = {'n_folds':[5],'max_depth': [10], 'n_estimators': [100], 'class_wt':[None,"balanced_subsample"], 'wl_thresh':[-30,0,30]} #'wl_thresh':[-15, -10, -5, 0]
+    d = {'n_folds':[5],'max_depth': [5,50], 'n_estimators': [120], 'class_wt':[None,"balanced_subsample"], 'wl_thresh':[-30,0,30]} #'wl_thresh':[-15, -10, -5, 0]
     #d = {'n_folds':[5],'max_depth': [10], 'n_estimators': [10], 'class_wt':[None], 'wl_thresh':[15],} #'wl_thresh':[-15, -10, -5, 0]
     hyperp=[dict(zip(d, v)) for v in product(*d.values())]
     #########
