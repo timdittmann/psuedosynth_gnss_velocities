@@ -29,7 +29,6 @@ ppsd_length=3600/3
 period_limits=[2/5,600]
 
 for k in np.arange(len(df3)):
-#for k in np.arange(1):
     try:
         site=df3.loc[k].station.upper()
         doy=df3.loc[k].doy
@@ -53,7 +52,8 @@ for k in np.arange(len(df3)):
         H_val+=Nppsd.psd_values
         V_val+=Zppsd.psd_values
 
-    except:
+    except Exception as e:
+        print(e)
         pass
 
 H_stacked=np.vstack(H_val)
@@ -90,4 +90,3 @@ for psd_stack_array,name in zip([H_stacked,V_stacked],["H","V"]):
     per_array['percentile']=np.arange(5,100,5)
     per_array=per_array.set_index('percentile')
     per_array.to_csv("../models/%s_psd_percentiles.csv" %name)
-

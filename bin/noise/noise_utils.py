@@ -1,39 +1,20 @@
-import pandas as pd
-from obspy import read
 import obspy
-from obspy.signal import PPSD
-from numpy import where,mean
-from glob import glob
-from matplotlib import pyplot as plt
-
-import numpy
-import datetime
-import calendar
 import math
-#import georinex as gr
-import obspy
-from obspy.io.sac import SACTrace
 import numpy as np
-import os
+from obspy.core.util import AttribDict
 
-import numpy as np
 
 def psd_stack2hist_stack(psd_stack_array, Eppsd):
     '''
-    ADD DOC
+    modified obspy script to to generate eppsd histogram
     '''
 
     # determine which psd pieces should be used in the stack,
     # based on all selection criteria specified by user
-    '''selected = self._stack_selection(
-        starttime=starttime, endtime=endtime,
-        time_of_weekday=time_of_weekday, year=year, month=month,
-        isoweek=isoweek, callback=callback)
-    '''
+ 
     selected = np.ones(psd_stack_array.shape[0], dtype=bool)
     used_indices = selected.nonzero()[0]
     used_count = len(used_indices)
-    #used_times = np.array(self._times_processed)[used_indices]
 
     period_bin_centers=Eppsd.period_bin_centers
     num_period_bins = len(period_bin_centers)
@@ -174,7 +155,6 @@ def get_percentile(hist_stack_cumul, percentile, _db_bin_edges, period_bin_cente
     
     
 
-from obspy.core.util import AttribDict
 
 def _plot_histogram(Eppsd, hist_stack,hist_stack_cumul, db_bins,draw=False, filename=None):
     import matplotlib.pyplot as plt
