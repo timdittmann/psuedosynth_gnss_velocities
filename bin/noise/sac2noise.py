@@ -15,7 +15,6 @@ from pathlib import Path
 from noise_utils import psd_stack2hist_stack, _plot_histogram, get_percentile
 
 
-#pq_file='/home/ec2-user/pgv_ml/synth_gnss_vel/data/ambient_5sps_6yr.pq'
 pq_file='../data/jgr_data/ambient_5sps_6yr.pq'
 df3=pd.read_parquet(pq_file)
 
