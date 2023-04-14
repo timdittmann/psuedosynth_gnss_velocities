@@ -22,7 +22,6 @@ def create_nga_event_station_list(rsn=False):
     else:
         root_dir='../'
         
-    path = Path(os.getcwd())
     meta_directory=os.path.join(root_dir,'data','ngaw2','*.csv')
     
     meta_files=glob.glob(meta_directory)
@@ -155,12 +154,9 @@ def write_to_pq(store_df_li, meta_array, noise_lev):
     ts_df=pd.concat(store_df_li, axis=1)
     
     meta_dict=make_meta_dict(meta_array, noise_lev)
-    #print(meta_dict)
-
     meta_key = 'feature_meta'
 
     table = pa.Table.from_pandas(ts_df)
-
     meta_json = json.dumps(meta_dict)
 
     existing_meta = table.schema.metadata
@@ -235,8 +231,6 @@ def apply_spectrum(w,A,f,hf_dt,is_gnss=False,gnss_scale=(1/2**0.5)*.5): #.5
     positive_freq=freq[1:int(1+Nf/2)]
       
     #Make POWER spectrum of windowed time series have a mean of 1
-    #norm_factor=hf_dt*mean(abs(fourier)**2)**0.5
-    #norm_factor=mean(abs(fourier))
     norm_factor=mean(abs(fourier)**2)**0.5
     fourier=fourier/norm_factor
     
@@ -256,10 +250,8 @@ def apply_spectrum(w,A,f,hf_dt,is_gnss=False,gnss_scale=(1/2**0.5)*.5): #.5
     #Negative freq
     amplitude[int(1+Nf/2):]=amplitude_positive[::-1]/2
     
-    #Scale for GNSS displacememnts?
+    #Scale for GNSS 
     if is_gnss:
-        #amplitude
-        #amplitude /= gnss_scale 
         amplitude /= (gnss_scale) 
         
     #Apply model amplitude spectrum
@@ -272,8 +264,7 @@ def apply_spectrum(w,A,f,hf_dt,is_gnss=False,gnss_scale=(1/2**0.5)*.5): #.5
     
     #ifft
     seis=real(fft.ifft(fourier))
-    
-    
+
     if is_gnss:
         seis *= len(seis)**0.5
         
@@ -287,32 +278,16 @@ def make_noise(n_steps,f,epsd,PGD=False):
     modified from D.Melgar Mudpy
     '''
     #define sample rate
-    dt=0.2 #make this 1 so that the length of PGD can be controlled by duration
-    
+    dt=0.2 
     duration=n_steps
     # get white noise
     E_noise=windowed_gaussian(duration,dt,window_type=None)
-    #N_noise=windowed_gaussian(duration,dt,window_type=None)
-    #Z_noise=windowed_gaussian(duration,dt,window_type=None)
-    noise=windowed_gaussian(duration,dt,window_type=None)
-    #get PSDs
-    #f,Epsd,Npsd,Zpsd=gnss_psd(level=level,return_as_frequencies=True,return_as_db=False)
-    #control the noise level
-    #scale=np.abs(np.random.randn()) #normal distribution
-    #Epsd=Epsd*scale
-    #Npsd=Npsd*scale
-    #Npsd=Npsd*scale
-    #Covnert PSDs to amplitude spectrum
+    #Convert PSDs to amplitude spectrum
     epsd = (epsd)**0.5
-    #Npsd = Npsd**0.5
-    #Zpsd = Zpsd**0.5
     #apply the spectrum
     E_noise=apply_spectrum(E_noise,epsd,f,dt,is_gnss=PGD)[:n_steps]
     E_noise=np.real(E_noise)
-    #N_noise=apply_spectrum(N_noise,Npsd,f,dt,is_gnss=True)[:n_steps]
-    #Z_noise=apply_spectrum(Z_noise,Zpsd,f,dt,is_gnss=True)[:n_steps]
     return E_noise
-
 
 def get_psd(h_or_v="H"):
     if os.path.basename(os.getcwd()) == 'mkfigs':
@@ -328,7 +303,6 @@ def modify_for_noise_df(psd_df, level=50):
     frequencies=1/np.array(psd_df.columns.values.tolist()[1:]).astype(float)[::-1]
 
     #reverse psds
-    #ppsd_out=ppsd_in[1][::-1]
     ppsd_out=psd_df[psd_df.percentile==level].values[0][1:][::-1]
     #linearize
     ppsd_out=10**(ppsd_out/10)
