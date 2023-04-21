@@ -121,7 +121,8 @@ def vertical_idx(ts_list):
 
 def add_random_buffer(y,t,samples,target_sr):
     y_add=np.random.normal(0,.01/100,samples)
-    t_add=np.arange(-len(y_add)+t.min(),+t.min(),1)/target_sr
+    #t_add=np.arange(-len(y_add)+t.min(),+t.min(),1)/target_sr
+    t_add=np.arange(-len(y_add), 0)/target_sr +t.min()
     y_new2=np.concatenate((y_add,y))
     t_new2=np.concatenate((t_add,t))
     return y_new2, t_new2

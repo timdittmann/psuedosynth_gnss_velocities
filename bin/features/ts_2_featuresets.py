@@ -137,7 +137,7 @@ def read_meta(path):
 
 def ts_2_feature_file(file):
     window_size=30*5
-    step_=5*5 #run every 5 second
+    step_=5*5 #run every 10 second
     obs_list=['H0','H1','UP']
     feature_list=[]
     

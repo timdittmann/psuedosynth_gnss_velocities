@@ -104,6 +104,8 @@ def mp_handler():
     
     nga_event_station_list=create_nga_event_station_list()
     print(len(nga_event_station_list))
+    #nga_event_station_list=nga_event_station_list[:1]
+    #print(nga_event_station_list)
     
     #initiate pool to parallel process stations
     print("There are {} CPUs on this machine ".format(cpu_count()))
