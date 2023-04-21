@@ -1,11 +1,14 @@
 import numpy
 import datetime
-import calendar
-import math
-import obspy
 from obspy.io.sac import SACTrace
 import numpy as np
 import os
+
+
+'''
+repurposed from B.Crowell's library
+https://github.com/crowellbw/SNIVEL/blob/master/SNIVEL_tools.py
+'''
 
 def gpsleapsec(gpssec):
     leaptimes = numpy.array([46828800, 78364801, 109900802, 173059203, 252028804, 315187205, 346723206, 393984007, 425520008, 457056009, 504489610, 551750411, 599184012, 820108813, 914803214, 1025136015, 1119744016, 1167264017])

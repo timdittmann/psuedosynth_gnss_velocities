@@ -15,6 +15,7 @@ import json
 
 def create_nga_event_station_list(rsn=False):
     '''
+    add docstring
     '''
     
     if os.path.basename(os.getcwd()) == 'mkfigs':

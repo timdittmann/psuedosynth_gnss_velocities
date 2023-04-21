@@ -8,13 +8,35 @@ from multiprocessing import Pool, cpu_count
 from generate_ts_utils import *
 
 class vel_ts:
+    '''
+    A class to represent a three-component velocity timeseries.
+
+    ...
+
+    Attributes
+    ----------
+    array : list
+        ngaw2 event station array 
+        'Record Sequence Number','Earthquake Name','Year','Station Name','Magnitude','Mechanism','Rjb (km)',
+            'Rrup (km)','Vs30 (m/sec)'
+    record_number : str
+        ngaw2 record number
+    age : int
+        age of the person
+
+    Methods
+    -------
+    vel_load_ds(self, target_sr):
+        loads, downsamples and labels NGAW2 waveforms. 
+    '''
     def __init__(self, array):
         self.array = array
         self.record_number= self.array[0]
-        #self.meta_dict=make_meta_dict(self.array)
-
         
     def vel_load_ds(self, target_sr):
+        '''
+        loads, downsamples and labels NGAW2 waveforms.
+        '''
         
         path = Path(os.getcwd())
         sm_fn=glob.glob(os.path.join(path.parent.absolute(),'data','ngaw2','RSN%s_*.VT2' %self.record_number))
@@ -29,7 +51,6 @@ class vel_ts:
         h0_idx=h_idxs[0]
         h1_idx=h_idxs[1]
         
-
         sr=1/dt
         deci=int(sr/target_sr)
         
@@ -44,6 +65,15 @@ class vel_ts:
         self.UP, self.time, self.UP_y=self.UP[:useable_len], self.time[:useable_len], self.UP_y[:useable_len]
         
 def generate_gnss_ts(nga_event_station):
+    '''
+    generate psuedo synthetic gnss velocity timeseries from ngaw2 waveforms at 7 noise levels
+    saves timeseries to parquet files
+
+    inputs:
+    -------
+    nga_event_station: list
+        list of station + metadata
+    '''
     try:
         vel_1=vel_ts(nga_event_station)
         target_sr=5
@@ -74,10 +104,6 @@ def mp_handler():
     
     nga_event_station_list=create_nga_event_station_list()
     print(len(nga_event_station_list))
-    
-    #write function to check whats already written and not reprocess
-    # read metadata of existing pq store to compile list of events-stations
-    # difference two lists for residual to process
     
     #initiate pool to parallel process stations
     print("There are {} CPUs on this machine ".format(cpu_count()))
