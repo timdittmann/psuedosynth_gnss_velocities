@@ -24,7 +24,7 @@ class vel_ts:
         # determine vertical TS
         up_idx=vertical_idx(sm_fn)
 
-        #sort out components- only distinguish between Vert and Horiz for gnss noise
+        #sort out components- distinguish between Vert and Horiz for gnss noise
         h_idxs=np.delete(np.arange(3),up_idx)
         h0_idx=h_idxs[0]
         h1_idx=h_idxs[1]
