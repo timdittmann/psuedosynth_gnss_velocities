@@ -154,9 +154,9 @@ def ambient_2_pq(file,set_num):
         # Only use the first 30 minutes
         ### EDIT HERE
         
-        #df=df[:int(30*60*5)]
+        df=df[:int(30*60*5)]
         # FOR UNSEEN TESTING USE 30:
-        df=df[int(30*60*5):]
+        #df=df[int(30*60*5):]
         
         
 
@@ -204,11 +204,9 @@ def ambient_2_pq(file,set_num):
     
 def mp_handler():
   
-    path = '/home/ec2-user/pgv_ml/snivel/output/ambient_set_2/velocities*'
-
+    path = '../data/jgr_data/output/ambient_set_2/velocities*'
     list_files=glob.glob(path)
     #list_files=glob.glob(path)[:150]
-
     random.shuffle(list_files)
 
     number_sets=50

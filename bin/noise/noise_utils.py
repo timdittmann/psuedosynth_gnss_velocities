@@ -233,11 +233,8 @@ def _plot_histogram(Eppsd, hist_stack,hist_stack_cumul, db_bins,draw=False, file
     fig.ppsd.quadmesh = ppsd
     
     ######
-    percentiles=[10, 25, 50, 75, 90]
-    percentiles=[50]
-    percentiles=np.arange(5,100,15)
-    #percentiles=[10, 50, 90]
-    show_percentiles=True
+    percentiles=[5, 50, 95]
+    show_percentiles=False
     if show_percentiles:
         # for every period look up the approximate place of the percentiles
         for percentile in percentiles:
@@ -281,7 +278,19 @@ def _plot_histogram(Eppsd, hist_stack,hist_stack_cumul, db_bins,draw=False, file
     ax.set_xlim(period_lim)
     ax.set_ylim(_db_bin_edges[0], _db_bin_edges[-1])
     
-    ax.set_ylabel('Amplitude [$m^2/s^2/Hz$] [dB]')
+    ax.set_ylabel('Amplitude [dB]') #m2/s2/hz
+    
+    #Set reference lines
+    ax.plot([2/5,100],[-23,-23],'k')
+    ax.plot([2/5,100],[-37,-37],'k')
+    ax.plot([2/5,100],[-57,-57],'k')
+
+    bbox = dict(boxstyle="round", fc="w")
+    ax.annotate('5cm/s',xy=(.5,-25),bbox=bbox)
+    ax.annotate('1cm/s',xy=(.5,-38),bbox=bbox)
+    ax.annotate('0.1cm/s',xy=(.5,-58),bbox=bbox)
+    
+    
     fig.tight_layout()
     if filename is not None:
         plt.savefig(filename, dpi=300)
@@ -349,8 +358,8 @@ def _plot_histogram_RX(Eppsd, hist_stack,hist_stack_cumul, db_bins,draw=False, f
     fig.ppsd.quadmesh = ppsd
     
     ######
-    percentiles=[10, 25, 50, 75, 90]
-    percentiles=[50]
+    percentiles=[5, 50, 95]
+    #percentiles=[50]
     #percentiles=np.arange(5,100,15)
     #percentiles=[10, 50, 90]
     show_percentiles=True
@@ -358,7 +367,7 @@ def _plot_histogram_RX(Eppsd, hist_stack,hist_stack_cumul, db_bins,draw=False, f
     periods, percentile_values = \
         get_percentile(hist_stack_cumul, 50, _db_bin_edges, period_bin_centers)
     xdata = periods
-    ax.plot(xdata, percentile_values, color=pltcolor, zorder=8, lw=4)
+    ax.plot(xdata, percentile_values, color='grey', zorder=8, lw=4)
     
     periods, percentile_values_l = \
         get_percentile(hist_stack_cumul, 25, _db_bin_edges, period_bin_centers)
@@ -413,16 +422,16 @@ def _plot_histogram_RX(Eppsd, hist_stack,hist_stack_cumul, db_bins,draw=False, f
     #Set reference lines
     #ax.plot([2,600],[-11,-11],'k')
     #ax.plot([2/5,100],[-20,-20],'k')
-    #ax.plot([2/5,100],[-26,-26],'k')
-    ax.plot([2/5,100],[-40,-40],'k')
-    ax.plot([2/5,100],[-60,-60],'k')
+    ax.plot([2/5,100],[-23,-23],'k')
+    ax.plot([2/5,100],[-37,-37],'k')
+    ax.plot([2/5,100],[-57,-57],'k')
 
     bbox = dict(boxstyle="round", fc="0.8")
     #ax.annotate('20cm/s',xy=(2.3,-11),bbox=bbox)
     #ax.annotate('10cm/s',xy=(2.3,-18),bbox=bbox)
-    #ax.annotate('5cm/s',xy=(2.3,-25),bbox=bbox)
-    ax.annotate('1cm/s',xy=(1,-40),bbox=bbox)
-    ax.annotate('0.1cm/s',xy=(1,-60),bbox=bbox)
+    ax.annotate('5cm/s',xy=(1,-23),bbox=bbox)
+    ax.annotate('1cm/s',xy=(1,-38),bbox=bbox)
+    ax.annotate('0.1cm/s',xy=(1,-58),bbox=bbox)
     
     fig.tight_layout()
     if filename is not None:

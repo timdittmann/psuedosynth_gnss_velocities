@@ -1,6 +1,5 @@
 import pandas as pd
 from obspy import read
-import obspy
 from obspy.signal import PPSD
 from numpy import where,mean
 from glob import glob
@@ -8,12 +7,9 @@ from matplotlib import pyplot as plt
 
 import numpy as np
 
-from obspy import read
 from pathlib import Path
 
-
 from noise_utils import psd_stack2hist_stack, _plot_histogram, get_percentile
-
 
 pq_file='../data/jgr_data/ambient_5sps_6yr.pq'
 df3=pd.read_parquet(pq_file)
@@ -56,19 +52,9 @@ for k in np.arange(len(df3)):
         pass
 
 H_stacked=np.vstack(H_val)
+print('hstack',H_stacked.shape)
 V_stacked=np.vstack(V_val)
-
-'''
-np.save('models/e_stacked_ambient.npy', e_stacked) 
-np.save('models/n_stacked_ambient.npy', n_stacked) 
-np.save('models/z_stacked_ambient.npy', z_stacked) 
-
-Eppsd.save_npz("models/Eppsd.npz") 
-Nppsd.save_npz("models/Nppsd.npz")
-Zppsd.save_npz("models/Zppsd.npz")
-
-'''
-
+print('vstack',V_stacked.shape)
 
 for psd_stack_array,name in zip([H_stacked,V_stacked],["H","V"]):
     hist_stack, hist_stack_cumul=psd_stack2hist_stack(psd_stack_array, Eppsd)
