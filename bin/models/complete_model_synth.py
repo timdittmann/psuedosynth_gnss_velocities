@@ -27,7 +27,7 @@ import sys
 from nested_xval_utils import *
 
 
-fs={'feature':['psd_t'], 'stacking':['horizontal'], 'dims':[['H0','H1','UP']], 'augment':[True,False]}
+fs={'feature':['psd_t'], 'stacking':['horizontal'], 'dims':[['H0','H1','UP']], 'augment':[True]}
 feature_sets=[dict(zip(fs, v)) for v in product(*fs.values())]
 
 #d = {'n_folds':[5],'max_depth': [50], 'n_estimators': [120], 'class_wt':[None],'wl_thresh':[0, 0.001,.005],}
