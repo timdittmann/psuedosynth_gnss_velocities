@@ -1,10 +1,7 @@
-from itertools import product
 import os
 import pandas as pd
 import numpy as np
-import glob
 
-import datetime
 from scipy import signal
 import pywt
 
@@ -13,48 +10,6 @@ import pyarrow.parquet as pq
 import json
 
 from multiprocessing import Pool, cpu_count
-
-
-'''
-def get_features(temp_df,direc):
-    tmp=temp_df['%s_ts' %direc]
-    #TIME
-    max_arr=tmp.abs().nlargest(4).values
-    med_arr=tmp.median()
-    mad_arr=tmp.mad()
-    time_f=np.concatenate((max_arr,[med_arr],[mad_arr]))
-
-    #frequency
-    f, p=signal.periodogram(x=tmp.values, fs=5, nfft=5*30)
-
-    #time-FREQUENCY
-    per_min=.4
-    per_max=10
-    f_min = 1/per_max
-    f_max = 1/per_min
-    f = np.logspace(np.log10(f_min), np.log10(f_max), 100)
-    w0=1
-    scales=w0 / (2 * np.pi * f)
-
-    [coefficients, frequencies] = pywt.cwt(tmp, scales, 'morl', 5)
-
-    #SNR metric
-    tmp_noise=temp_df['%s_noise' %direc]
-    tmp_sig=tmp-tmp_noise
-    [sig_coefficients, frequencies] = pywt.cwt(tmp_sig, scales, 'morl', 5)
-    [noise_coefficients, frequencies] = pywt.cwt(tmp_noise, scales, 'morl', 5)
-    wl_snr=np.max((np.abs(sig_coefficients)-np.abs(noise_coefficients)))
-
-    y_label=0
-    if temp_df['%s_label' %direc].sum()>0:
-        y_label=1
-
-    feature_ds = pd.DataFrame({'time':[tmp.index[-1]], direc+'_time':[time_f], 
-                               direc+'_psd':[p], direc+'_wl':[coefficients.flatten()],
-                   direc+'_wl_snr':[wl_snr], direc+'_Y_sum':[temp_df['%s_label' %direc].sum()], direc+'_Y':[y_label]})
-
-    return feature_ds
-'''
 
 def ts_features(tmp):
     max_arr=tmp.abs().nlargest(4).values

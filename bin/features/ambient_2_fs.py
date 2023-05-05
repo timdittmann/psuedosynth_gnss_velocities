@@ -5,30 +5,20 @@ import json
 import glob
 import random
 
-
 import numpy as np
-
-from itertools import product
 import os
 import pandas as pd
 import numpy as np
-import glob
 
 import datetime
 from scipy import signal
 import pywt
-
-import pyarrow as pa
-import pyarrow.parquet as pq
-import json
 
 from multiprocessing import Pool, cpu_count
 
 #import sys
 #sys.path.insert(1, '/home/ec2-user/pgv_ml/snivel/notebooks/')
 from pgv_ml_utils import *
-
-
 
 def get_features_ambient(tmp,obs):
     

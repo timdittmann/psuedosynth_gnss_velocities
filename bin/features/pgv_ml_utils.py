@@ -5,41 +5,22 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-import random
 import glob
 
-import pyarrow as pa
 import pyarrow.parquet as pq
 import json
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import precision_recall_fscore_support, f1_score
 from sklearn.metrics import precision_recall_curve
-from sklearn.metrics import accuracy_score
 
 # optimal threshold for precision-recall curve with logistic regression model
 from numpy import argmax
 
-from itertools import product
 from collections import deque
-
-import datetime
-import pandas as pd
-import matplotlib.pyplot as plt
-import numpy as np
 from scipy import signal
-import os
-
 
 import urllib.request
-import json
-
-import datetime
-import pandas as pd
-import matplotlib.pyplot as plt
-import numpy as np
-
-
 
 def read_meta(path):
     custom_meta_key = 'feature_meta'
