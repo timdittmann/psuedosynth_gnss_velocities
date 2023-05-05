@@ -1,6 +1,7 @@
-# pseudo (they are real seismic waveforms combined with noise generated from real GNSS noise distributions) 
-# synthetic (they aren't actually observed timeseries)
-# GNSS velocities (see SNIVEL)
+# Psuedosynthetic GNSS Velocities
+* **pseudo** (they are real seismic waveforms combined with noise generated from real GNSS noise distributions) 
+* **synthetic** (they aren't actually observed timeseries)
+* **GNSS velocities** (see [SNIVEL](https://github.com/crowellbw/SNIVEL))
 
 ## Refrerence:
 Manuscript: Dittmann, T., Morton, J., Crowell, B., Melgar, D., DeGrande, J., and Mencin, D. (202?) Characterizing High Rate GNSS Velocity Noise for Synthesizing a GNSS Strong Motion Learning Catalog. (In prep)
