@@ -116,18 +116,6 @@ def write_to_pq_ambient(store_df_li, meta_array, noise_lev):
     pq.write_table(table, fpath)
 
 
-
-
-
-import pandas as pd
-import pyarrow as pa
-import pyarrow.parquet as pq
-import json
-import glob
-import random
-
-
-
 def ambient_2_pq(file,set_num):
     try:
         window_size=30

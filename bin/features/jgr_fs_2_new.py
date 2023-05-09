@@ -123,17 +123,6 @@ def write_to_pq_old2new(store_df_li, meta_array, noise_lev):
 
 
 
-
-
-import pandas as pd
-import pyarrow as pa
-import pyarrow.parquet as pq
-import json
-import glob
-import random
-
-
-
 def oldfs_2_newfs(infile):
     try:
         obs_list=['dedt', 'dndt', 'dudt']
