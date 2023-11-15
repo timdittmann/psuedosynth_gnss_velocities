@@ -4,7 +4,7 @@
 * **GNSS velocities** (see [SNIVEL](https://github.com/crowellbw/SNIVEL))
 
 ## Refrerence:
-Manuscript: Dittmann, T., Morton, J., Crowell, B., Melgar, D., DeGrande, J., and Mencin, D. (202?) Characterizing High Rate GNSS Velocity Noise for Synthesizing a GNSS Strong Motion Learning Catalog. (In prep)
+Manuscript: Dittmann, T., Morton, J., Crowell, B., Melgar, D., DeGrande, J., and Mencin, D. (2023) [Characterizing High Rate GNSS Velocity Noise for Synthesizing a GNSS Strong Motion Learning Catalog](https://seismica.library.mcgill.ca/article/view/978). Seismica.
 
 Data: [Zenodo Dataset](https://doi.org/10.5281/zenodo.7909327)
 
