@@ -6,7 +6,7 @@
 ## Refrerence:
 Manuscript: Dittmann, T., Morton, J., Crowell, B., Melgar, D., DeGrande, J., and Mencin, D. (202?) Characterizing High Rate GNSS Velocity Noise for Synthesizing a GNSS Strong Motion Learning Catalog. (In prep)
 
-Data: [Zenodo Dataset]()
+Data: [Zenodo Dataset](https://doi.org/10.5281/zenodo.7909327)
 
 ## This respository presents the analysis used to: 
 1. characterize real world 5Hz GNSS velocity noise using probabalistic power spectral density estimation
