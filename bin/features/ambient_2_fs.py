@@ -14,6 +14,9 @@ import datetime
 from scipy import signal
 import pywt
 
+import s3fs
+import boto3
+
 from multiprocessing import Pool, cpu_count
 
 #import sys
@@ -88,9 +91,9 @@ def make_meta_dict(meta_array, noise_lev):
         }
     return meta_content
 
-def write_to_pq_ambient(store_df_li, meta_array, noise_lev):
-    ts_df=pd.concat(store_df_li, axis=0)
-    ts_df=ts_df.reset_index(drop=True)
+def write_to_pq_ambient(df, meta_array, noise_lev, store_type):
+    #ts_df=pd.concat(store_df_li, axis=0)
+    ts_df=df.reset_index(drop=True)
     
     meta_dict=make_meta_dict(meta_array, noise_lev)
     print(meta_dict)
@@ -106,7 +109,7 @@ def write_to_pq_ambient(store_df_li, meta_array, noise_lev):
         meta_key.encode() : meta_json.encode(),
         **existing_meta
     }
-
+    '''
     table = table.replace_schema_metadata(combined_meta)
     from pathlib import Path
     path = Path(os.getcwd())
@@ -114,6 +117,20 @@ def write_to_pq_ambient(store_df_li, meta_array, noise_lev):
     fpath=os.path.join(path.parent.absolute(),'data','feature_sets','%s_%sa.pq' %(meta_dict['record_number'],meta_dict['station'])) 
     #fpath=os.path.join(path.parent.absolute(),'data','feature_sets_ambient_test','%s_%sa.pq' %(meta_dict['record_number'],meta_dict['station']))
     pq.write_table(table, fpath)
+    '''
+    table = table.replace_schema_metadata(combined_meta)
+    writer = pa.BufferOutputStream()
+    pq.write_table(table, writer)
+    body = bytes(writer.getvalue())
+    
+    bucket='gnss-ml-dev-us-east-2-gbmm8xhl6lon'
+    key="/".join(['snivel','ambient',store_type,'%s_%sa.pq' %(meta_dict['record_number'],meta_dict['station'])])
+    
+    session = boto3.Session()
+    
+    s3 = session.client("s3")
+   
+    s3.put_object(Body=body, Bucket=bucket, Key=key)
 
 
 def ambient_2_pq(file,set_num):
@@ -122,21 +139,17 @@ def ambient_2_pq(file,set_num):
         obs_list=['dedt', 'dndt', 'dudt']
         direc=['H0','H1','UP']
 
-
         station=file[-17:-13]
         year=file[-8:-4]
         doy=file[-12:-9]
-
 
         df=read_vel_fname(file)
         # Only use the first 30 minutes
         ### EDIT HERE
         
-        df=df[:int(30*60*5)]
+        df=df[int(30*60*5):]
         # FOR UNSEEN TESTING USE 30:
-        #df=df[int(30*60*5):]
-        
-        
+        #df=df[int(30*60*5):] 
 
         feature_list=[]
 
@@ -173,8 +186,11 @@ def ambient_2_pq(file,set_num):
         #event == ambient set num
         meta_array[1]='ambient_'+str(set_num)
 
-
-        write_to_pq_ambient(feature_list, meta_array, noise_lev)
+        ts_df=df
+        write_to_pq_ambient(ts_df, meta_array, noise_lev, store_type='ts')
+        
+        feature_df=pd.concat(feature_list, axis=0)
+        write_to_pq_ambient(feature_df, meta_array, noise_lev, store_type='rf_fs_v1')
     except Exception as e:
         print(e)
         pass
@@ -182,9 +198,17 @@ def ambient_2_pq(file,set_num):
     
 def mp_handler():
   
-    path = '../data/jgr_data/output/ambient_set_2/velocities*'
-    list_files=glob.glob(path)
+    #path = '../data/jgr_data/output/ambient_set_2/velocities*'
+    #list_files=glob.glob(path)
     #list_files=glob.glob(path)[:150]
+    
+    s3 = s3fs.S3FileSystem(anon=False)
+    s3_prefix='s3://'
+    list_files=s3.glob(s3_prefix+'gnss-ml-dev-us-east-2-gbmm8xhl6lon/snivel/JGR/jgr_data/output/ambient_set_2/velocities*')
+    list_files=[s3_prefix + s for s in list_files]
+    #list_files=list_files[:25]
+    
+    
     random.shuffle(list_files)
 
     number_sets=50
