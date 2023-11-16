@@ -7,6 +7,8 @@ import glob
 from obspy.signal.filter import lowpass
 import os
 from pathlib import Path
+import s3fs
+import boto3
 
 import pyarrow as pa
 import pyarrow.parquet as pq
@@ -15,17 +17,11 @@ import json
 
 def create_nga_event_station_list(rsn=False):
     '''
-    add docstring
     '''
-    
-    if os.path.basename(os.getcwd()) == 'mkfigs':
-        root_dir='../../'
-    else:
-        root_dir='../'
-        
-    meta_directory=os.path.join(root_dir,'data','ngaw2','*.csv')
-    
-    meta_files=glob.glob(meta_directory)
+    s3 = s3fs.S3FileSystem(anon=False)
+    s3_prefix='s3://'
+    meta_files=s3.glob(s3_prefix+'gnss-ml-dev-us-east-2-gbmm8xhl6lon/ngaw2/*.csv')
+    meta_files=[s3_prefix + s for s in meta_files]
 
     meta_list=[]
     for meta_file in meta_files:
@@ -63,23 +59,33 @@ def load_ds_label(sm_f,sr, deci, buffer45=True):
     return y_new, t_new, label_arr
     
     
-def meta_check(vel_file):
+def meta_check(url_):
     # convert to m/s, default from cm/s, but will check
     scale_f=100
+    
+    #https://stackoverflow.com/questions/42641315/s3-urls-get-bucket-name-and-path
+    from urllib.parse import urlparse
+    o = urlparse(url_, allow_fragments=False)
+    bucket=o.netloc
+    key=o.path.lstrip('/')
+    
+    s3_client = boto3.client('s3')
 
-    with open(vel_file, 'rb') as infile:
-        for lineno, line in enumerate(infile): 
-            if line.decode("utf-8").startswith('VELOCITY'):
-                units=((line.split()[6]))
-                if units.decode("utf-8") == 'CM/S':
-                    scale_f=100
-                if units.decode("utf-8") == 'M/S':
-                    scale_f=1
-                if units.decode("utf-8") == 'MM/S':
-                    scale_f=1000
-            if line.decode("utf-8").startswith('NPTS'):
-                dt=float((line.split()[3][:6]))
-                break
+    s3_response_object = s3_client.get_object(Bucket=bucket, Key=key)
+    infile = s3_response_object['Body'].iter_lines()
+    #with open(vel_file, 'rb') as infile:
+    for lineno, line in enumerate(infile): 
+        if line.decode("utf-8").startswith('VELOCITY'):
+            units=((line.split()[6]))
+            if units.decode("utf-8") == 'CM/S':
+                scale_f=100
+            if units.decode("utf-8") == 'M/S':
+                scale_f=1
+            if units.decode("utf-8") == 'MM/S':
+                scale_f=1000
+        if line.decode("utf-8").startswith('NPTS'):
+            dt=float((line.split()[3][:6]))
+            break
     return scale_f, dt
 
 def stalta_labels(time_array, ts_array, sample_rate):
@@ -122,7 +128,7 @@ def vertical_idx(ts_list):
 def add_random_buffer(y,t,samples,target_sr):
     y_add=np.random.normal(0,.01/100,samples)
     #t_add=np.arange(-len(y_add)+t.min(),+t.min(),1)/target_sr
-    t_add=np.arange(-len(y_add), 0)/target_sr +t.min()
+    t_add=np.arange(-len(y_add)+t.min(),t.min(),1)/target_sr
     y_new2=np.concatenate((y_add,y))
     t_new2=np.concatenate((t_add,t))
     return y_new2, t_new2
@@ -156,9 +162,12 @@ def write_to_pq(store_df_li, meta_array, noise_lev):
     ts_df=pd.concat(store_df_li, axis=1)
     
     meta_dict=make_meta_dict(meta_array, noise_lev)
+    #print(meta_dict)
+
     meta_key = 'feature_meta'
 
     table = pa.Table.from_pandas(ts_df)
+
     meta_json = json.dumps(meta_dict)
 
     existing_meta = table.schema.metadata
@@ -168,9 +177,18 @@ def write_to_pq(store_df_li, meta_array, noise_lev):
     }
 
     table = table.replace_schema_metadata(combined_meta)
-    path = Path(os.getcwd())
-    fpath=os.path.join(path.parent.absolute(),'data','synth_ts','%s_%02d.pq' %(meta_dict['record_number'],noise_lev)) 
-    pq.write_table(table, fpath)
+    writer = pa.BufferOutputStream()
+    pq.write_table(table, writer)
+    body = bytes(writer.getvalue())
+    
+    bucket='gnss-ml-dev-us-east-2-gbmm8xhl6lon'
+    key="/".join(['snivel','synth','ts','%s_%02d.pq' %(meta_dict['record_number'],noise_lev)])
+    
+    session = boto3.Session()
+    
+    s3 = session.client("s3")
+   
+    s3.put_object(Body=body, Bucket=bucket, Key=key)
     
     
 ###############################

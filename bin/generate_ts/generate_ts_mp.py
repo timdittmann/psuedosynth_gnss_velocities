@@ -3,9 +3,11 @@ import glob
 
 import numpy as np
 import pandas as pd
+import s3fs
 
 from multiprocessing import Pool, cpu_count
 from generate_ts_utils import *
+
 
 class vel_ts:
     '''
@@ -37,10 +39,14 @@ class vel_ts:
         '''
         loads, downsamples and labels NGAW2 waveforms.
         '''
+        s3 = s3fs.S3FileSystem(anon=False)
+        s3_prefix='s3://'
+        bucket='gnss-ml-dev-us-east-2-gbmm8xhl6lon'
+        key='ngaw2/RSN%s_*.VT2' %self.record_number
+        sm_fn=s3.glob(s3_prefix+bucket+'/'+key)
         
-        path = Path(os.getcwd())
-        sm_fn=glob.glob(os.path.join(path.parent.absolute(),'data','ngaw2','RSN%s_*.VT2' %self.record_number))
-
+        sm_fn=[s3_prefix + s for s in sm_fn]
+        
         scale_f, dt= meta_check(sm_fn[0])
 
         # determine vertical TS
